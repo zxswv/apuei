@@ -1,20 +1,76 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-
+/*カレンダーのインポート*/
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { Calendar, LocaleConfig } from "react-native-calendars";
+import moment from "moment";
+/*終わり*/
+/*カレンダーの本文*/
 export default function App() {
+  const [selected, setSelected] = useState(INITIAL_DATE);
+  const handleDayPress = (day) => {
+    setSelected(day.dateString);
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>これがスマホアプリのだ一歩だ！</Text>
-      <StatusBar style="auto" />
+    <View style={{ paddingTop: 40 }}>
+      <Calendar
+        monthFormat={"yyyy年 MM月"}
+        current={INITIAL_DATE}
+        markedDates={{
+          [selected]: {
+            selected: true,
+            disableTouchEvent: true,
+            selectedColor: "pink",
+            selectedTextColor: "white",
+          },
+        }}
+        onDayPress={handleDayPress}
+      />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+LocaleConfig.locales.jp = {
+  today: "今日",
+  monthNames: [
+    "1 月",
+    "2 月",
+    "3 月",
+    "4 月",
+    "5 月",
+    "6 月",
+    "7 月",
+    "8 月",
+    "9 月",
+    "10 月",
+    "11 月",
+    "12 月",
+  ],
+  monthNamesShort: [
+    "1 月",
+    "2 月",
+    "3 月",
+    "4 月",
+    "5 月",
+    "6 月",
+    "7 月",
+    "8 月",
+    "9 月",
+    "10 月",
+    "11 月",
+    "12 月",
+  ],
+  dayNames: [
+    "日曜日",
+    "月曜日",
+    "火曜日",
+    "水曜日",
+    "木曜日",
+    "金曜日",
+    "土曜日",
+  ],
+  dayNamesShort: ["日", "月", "火", "水", "木", "金", "土"],
+};
+LocaleConfig.defaultLocale = "jp";
+
+const INITIAL_DATE = moment().format("YYYY-MM-DD");
