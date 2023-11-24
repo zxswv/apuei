@@ -1,0 +1,166 @@
+import React, {Component} from 'react';
+import { StyleSheet} from 'react-native';
+import {Icon, Text, View, Button } from 'native-base';
+import Modal from 'react-native-modal'
+import { Calendar, DateObject } from 'react-native-calendars';
+
+/**
+ * テーマカラー
+ */
+const THEME_COLOR : string = '#36C1A7';
+
+/**
+ * react-native-calendarsの形式(YYYY-MM-DD)にフォーマットする
+ * @param date 
+ */
+const formatDate = (date: Date): string => {
+
+    let format : string = 'YYYY-MM-DD';
+
+    // 年
+    format = format.replace(/YYYY/g, date.getFullYear().toString());
+    // 月
+    format = format.replace(/MM/g, ('0' + (date.getMonth() + 1)).slice(-2));
+    // 日
+    format = format.replace(/DD/g, ('0' + date.getDate()).slice(-2));
+
+    return format;
+};
+
+/**
+* Props
+*/
+interface Props {
+    // 表示フラグ
+    visible : boolean,
+    // 選択中日付の初期値
+    defaultDate?: Date,
+    // 選択可能最小日付
+    minDate? : Date,
+    // 選択可能最大日付
+    maxDate? : Date,
+    // 日付決定時処理
+    onConfirm : (date : Date) => void,
+}
+
+/**
+* State
+*/
+interface State {
+    selectedDate: Date,
+}
+
+/**
+* カレンダーモーダル
+*/
+export default class CommonCalendar extends React.PureComponent<Props, State> {
+
+    /**
+    * コンストラクタ
+    * @param props
+    */
+    constructor(props: Props){
+        super(props);
+
+        this.state = {
+            selectedDate : this.props.defaultDate? this.props.defaultDate : new Date(),
+        }
+
+        this.handlePressDay = this.handlePressDay.bind(this);
+        this.handlePressConfirmButton = this.handlePressConfirmButton.bind(this);
+    }
+
+    /**
+    * 日付押下時処理
+    * @param date
+    */
+    public handlePressDay(date : DateObject) {
+        // selectedDateを更新
+        this.setState({
+            selectedDate : new Date(date.year, date.month - 1, date.day),
+        })
+    }
+
+    /**
+    * 決定ボタン押下時処理
+    */
+    public handlePressConfirmButton() {
+
+        const { selectedDate } = this.state;
+
+        if(this.props.onConfirm) {
+            this.props.onConfirm(selectedDate);
+        }
+    }
+
+    /**
+    * 描画処理
+    */
+    render() {
+
+        const { visible, minDate, maxDate, onConfirm } = this.props;
+        const { selectedDate } = this.state;
+        const selectedDateText : string = formatDate(selectedDate);
+
+        return (
+            <Modal isVisible={visible}>
+                <View style={styles.container}>
+                    <Text style={styles.title}>日付を選択してください</Text>
+                    <Calendar current={selectedDate}
+                        markedDates={{[selectedDateText] : {selected: true, selectedColor: THEME_COLOR}}}
+                        minDate={minDate}
+                        maxDate={maxDate}
+                        renderArrow={(direction : 'left' | 'right') => {
+                            if(direction === 'left') {
+                                return (
+                                    <Icon type="FontAwesome5" name="arrow-left" style={styles.arrow} />
+                                );
+                            }
+                            else {
+                                return (
+                                    <Icon type="FontAwesome5" name="arrow-right" style={styles.arrow} />
+                                );
+                            }
+                        }}
+                        theme={{
+                            todayTextColor : THEME_COLOR
+                        }}
+                        onDayPress={this.handlePressDay} />
+                    <Button block style={styles.confirmButton} onPress={this.handlePressConfirmButton} >
+                        <Text style={styles.confirmButtonText}>決定</Text>
+                    </Button>
+                </View>
+            </Modal>
+        );
+    }
+}
+
+/**
+* スタイル定義
+*/
+const styles : StyleSheet.NamedStyles<any> = StyleSheet.create({
+    container : {
+        backgroundColor : '#FFF',
+        padding : '5%'
+    },
+    title : {
+        color : THEME_COLOR,
+        fontWeight : 'bold',
+        textAlign: 'center'
+    },
+    arrow : {
+        color : THEME_COLOR,
+    },
+    confirmButton : {
+        marginTop : '5%',
+        backgroundColor : '#FFF',
+        borderColor : THEME_COLOR,
+        borderWidth : 1,
+        borderRadius : 10
+    },
+    confirmButtonText : {
+        color : THEME_COLOR,
+        fontWeight : 'bold',
+        textAlign : 'center'
+    },
+});
