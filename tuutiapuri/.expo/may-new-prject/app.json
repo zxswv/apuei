@@ -21,7 +21,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#aaaaa"
-      }
+      },
+      "package": "com.zxswv.maynewprject"
     },
     "web": {
       "favicon": "./assets/favicon.png"
