@@ -1,14 +1,103 @@
 /*カレンダーのインポート*/
-import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, View, TextInput } from "react-native";
+import { Text, Input, Divider, CheckBox } from "react-native-elements";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import moment from "moment";
+import Storage from "react-native-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const storage = new Storage({
+  size: 370 * 4,
+  storageBackend: AsyncStorage,
+  defaultExpires: null,
+  enableCache: this,
+});
+
+lib - Cov;
+
+function SchedulePanel({ selectedDey }) {
+  const [minute, setMinute] = useState(0);
+  const [hour, setHour] = useState(0);
+  const [title, setTitle] = useState("");
+
+  useEffect(() => {
+    setMinute(0);
+    setHour(0);
+    setTitle("");
+  }, [selectedDey]);
+
+  useEffect(() => {
+    const data = {
+      selectedDey,
+      title,
+      hour,
+      minute,
+    };
+    console.log("##", data);
+
+    storage.save({
+      key: "data-" + selectedDey,
+      data,
+    });
+  }, [minute, hour, title]);
+
+  const [checked, setChecked] = useState(false);
+  const onPressCheckBox = () => {
+    setChecked(!checked);
+  };
+
+  function TimeInput() {
+    return (
+      <View>
+        <Input
+          placeholder="時"
+          value={hour.toString()}
+          onChangeText={(value) => {
+            setHour(Number(value));
+          }}
+        />
+        <Text>:</Text>
+        <Input
+          placeholder="分"
+          value={minute.toString()}
+          onChangeText={(value) => {
+            setMinute(Number(value));
+          }}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View>
+      <Text h1>{selectedDey}</Text>
+      <Divider>
+        <TimeInput />
+        <Input
+          placeholder="予定名前"
+          value={title}
+          onChangeText={(value) => {
+            setTitle(value);
+          }}
+        />
+        <CheckBox
+          title="マナーモードーON"
+          checked={checked}
+          onPress={onPressCheckBox}
+        />
+      </Divider>
+    </View>
+  );
+}
+
 /*終わり*/
 /*カレンダーの本文*/
 export default function App() {
   const [selected, setSelected] = useState(INITIAL_DATE);
   const handleDayPress = (day) => {
     setSelected(day.dateString);
+    console.log(day);
   };
 
   return (
@@ -26,6 +115,7 @@ export default function App() {
         }}
         onDayPress={handleDayPress}
       />
+      <SchedulePanel selectedDey={selected} />
     </View>
   );
 }
