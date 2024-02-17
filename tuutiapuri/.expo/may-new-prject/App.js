@@ -1,11 +1,12 @@
 /*カレンダーのインポート*/
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, TextInput } from "react-native";
+import { StyleSheet, View, TextInput, TouchableOpacity } from "react-native";
 import { Text, Input, Divider, CheckBox } from "react-native-elements";
-import { Calendar, LocaleConfig } from "react-native-calendars";
+import { Calendar, CalendarList, LocaleConfig } from "react-native-calendars";
 import moment from "moment";
 import Storage from "react-native-storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+//import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const storage = new Storage({
   size: 370 * 4,
@@ -14,9 +15,10 @@ const storage = new Storage({
   enableCache: this,
 });
 
-lib - Cov;
-
-function SchedulePanel({ selectedDey }) {
+function SchedulePanel({ selectedDey, visible }) {
+  if (!visible) {
+    return null;
+  }
   const [minute, setMinute] = useState(0);
   const [hour, setHour] = useState(0);
   const [title, setTitle] = useState("");
@@ -70,7 +72,16 @@ function SchedulePanel({ selectedDey }) {
   }
 
   return (
-    <View>
+    <View
+      style={{
+        width: "100%",
+        backgroundColor: "#e9e7e4",
+        padding: 16,
+        position: "absolute",
+        bottom: 0,
+        height: "70%",
+      }}
+    >
       <Text h1>{selectedDey}</Text>
       <Divider>
         <TimeInput />
@@ -95,14 +106,20 @@ function SchedulePanel({ selectedDey }) {
 /*カレンダーの本文*/
 export default function App() {
   const [selected, setSelected] = useState(INITIAL_DATE);
+  const [visible, setVisible] = useState(false);
   const handleDayPress = (day) => {
+    setVisible(true);
     setSelected(day.dateString);
     console.log(day);
   };
 
   return (
-    <View style={{ paddingTop: 40 }}>
-      <Calendar
+    <View style={{ paddingTop: 40, width: "100%", height: "100%" }}>
+      <CalendarList
+        pastScrollRange={0}
+        futureScrollRange={1}
+        scrollEnabled={true}
+        showScrollIndicator={true}
         monthFormat={"yyyy年 MM月"}
         current={INITIAL_DATE}
         markedDates={{
@@ -115,7 +132,22 @@ export default function App() {
         }}
         onDayPress={handleDayPress}
       />
-      <SchedulePanel selectedDey={selected} />
+      <TouchableOpacity
+        onPress={function () {
+          setVisible(false);
+        }}
+        style={{
+          display: visible ? "block" : "none",
+          position: "absolute",
+          top: 0,
+          height: "30%",
+          width: "100%",
+          backgroundColor: "transparent",
+        }}
+      >
+        <View />
+      </TouchableOpacity>
+      <SchedulePanel selectedDey={selected} visible={visible} />
     </View>
   );
 }
